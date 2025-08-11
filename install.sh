@@ -50,7 +50,8 @@ source $OMARCHY_INSTALL/development/terminal.sh
 source $OMARCHY_INSTALL/development/development.sh
 # Neovim managed by nix home-manager - installation disabled
 # source $OMARCHY_INSTALL/development/nvim.sh
-source $OMARCHY_INSTALL/development/ruby.sh
+# Ruby development removed - not needed
+# source $OMARCHY_INSTALL/development/ruby.sh
 source $OMARCHY_INSTALL/development/docker.sh
 source $OMARCHY_INSTALL/development/firewall.sh
 
