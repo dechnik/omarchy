@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Compare every file in the repo's config directory with the user's ~/.config counterpart
+
+# Resolve directories
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+SOURCE_CONFIG_DIR="$ROOT_DIR/config"
+TARGET_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+if [[ ! -d "$SOURCE_CONFIG_DIR" ]]; then
+  echo "Source config directory not found: $SOURCE_CONFIG_DIR" >&2
+  exit 1
+fi
+
+# Choose diff program (prefer colordiff if available)
+if command -v colordiff >/dev/null 2>&1; then
+  DIFF_CMD=(colordiff -u --new-file)
+else
+  DIFF_CMD=(diff -u --new-file)
+fi
+
+show_usage() {
+  cat <<EOF
+Usage: $(basename "$0") [PATH ...]
+
+Without arguments, compares all files under: $SOURCE_CONFIG_DIR
+If PATH arguments are provided, they are interpreted relative to the repo config root
+and only those paths (files or directories) are compared.
+EOF
+}
+
+collect_sources() {
+  # Collect a list of source file paths under SOURCE_CONFIG_DIR based on optional user-specified paths
+  if [[ $# -eq 0 ]]; then
+    find "$SOURCE_CONFIG_DIR" -type f -print0
+  else
+    while (( "$#" )); do
+      local rel="$1"
+      shift
+      local abs="$SOURCE_CONFIG_DIR/$rel"
+      if [[ -d "$abs" ]]; then
+        find "$abs" -type f -print0
+      elif [[ -f "$abs" ]]; then
+        printf '%s\0' "$abs"
+      else
+        echo "Warning: path not found: $rel" >&2
+      fi
+    done
+  fi
+}
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+  show_usage
+  exit 0
+fi
+
+# Iterate over source files and compare with target counterparts
+mapfile -d '' SOURCE_FILES < <(collect_sources "$@") || true
+
+if [[ ${#SOURCE_FILES[@]} -eq 0 ]]; then
+  echo "No source files to compare under $SOURCE_CONFIG_DIR" >&2
+  exit 0
+fi
+
+EXIT_STATUS=0
+
+for SRC in "${SOURCE_FILES[@]}"; do
+  REL_PATH="${SRC#"$SOURCE_CONFIG_DIR/"}"
+  DEST="$TARGET_CONFIG_DIR/$REL_PATH"
+
+  # Skip identical files quickly
+  if [[ -f "$DEST" ]] && cmp -s "$SRC" "$DEST"; then
+    continue
+  fi
+
+  # Ensure destination's parent directory exists notionally; diff will handle missing files with --new-file
+  # Print a section header for readability
+  echo "--- repo:config/$REL_PATH\t(home:~/.config/$REL_PATH) ---"
+
+  # Run diff; ignore exit code 1 (differences found)
+  if ! "${DIFF_CMD[@]}" --label "repo:config/$REL_PATH" --label "home:~/.config/$REL_PATH" "$SRC" "$DEST"; then
+    # diff returns 1 on differences, 2 on trouble
+    status=$?
+    if [[ $status -ge 2 ]]; then
+      echo "Error running diff for: $REL_PATH" >&2
+      EXIT_STATUS=$status
+    fi
+  fi
+done
+
+exit $EXIT_STATUS
+
+
