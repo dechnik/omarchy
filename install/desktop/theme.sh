@@ -15,9 +15,11 @@ if ! yay -! yaru-icon-theme &>/dev/null; then
   yay -S --noconfirm yaru-icon-theme
 fi
 
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+yay -S --noconfirm bibata-cursor-theme gruvbox-material-icon-theme-git colloid-gruvbox-gtk-theme-git
+
+gsettings set org.gnome.desktop.interface gtk-theme "Colloid-Dark-Compact-Gruvbox"
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-gsettings set org.gnome.desktop.interface icon-theme "Yaru-blue"
+gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Material-Dark"
 
 # Setup theme links
 mkdir -p ~/.config/omarchy/themes

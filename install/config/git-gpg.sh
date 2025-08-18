@@ -36,6 +36,8 @@ tee ~/.gnupg/gpg-agent.conf >/dev/null <<EOF
 enable-ssh-support
 grab
 pinentry-program /usr/bin/pinentry-gnome3
+default-cache-ttl 600
+max-cache-ttl 7200
 EOF
 
 tee ~/.gnupg/scdaemon.conf >/dev/null <<EOF
