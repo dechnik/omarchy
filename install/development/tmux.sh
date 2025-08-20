@@ -1,7 +1,8 @@
 #!/bin/bash
 
 yay -S --noconfirm --needed \
-  tmux pstree fd sesh-bin blesh-git starship pass
+  tmux pstree fd sesh-bin blesh-git starship pass \
+  direnv fzf
 
 mkdir -p ~/.config/tmux/plugins
 
