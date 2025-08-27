@@ -10,8 +10,9 @@ if omarchy-cmd-present chromium; then
     fi
   }
 
-  omarchy-pkg-drop chromium
-  omarchy-pkg-add omarchy-chromium
+if command -v chromium &>/dev/null; then
+  sudo pacman -Rns --noconfirm chromium || true
+  sudo pacman -S --noconfirm omarchy-chromium
 
   if pgrep -x chromium; then
     if gum confirm "Chromium must be restarted. Ready?"; then
