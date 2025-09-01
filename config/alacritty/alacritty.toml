@@ -13,7 +13,6 @@ size = 10
 padding.x = 2
 padding.y = 2
 decorations = "None"
-opacity = 0.98
 
 [terminal.shell]
 program = "bash"
