@@ -56,19 +56,5 @@ source $OMARCHY_INSTALL/login/plymouth.sh
 source $OMARCHY_INSTALL/login/limine-snapper.sh
 source $OMARCHY_INSTALL/login/alt-bootloaders.sh
 
-# Pin bad packages
-sudo pacman -U --noconfirm https://pkgs.omarchy.org/x86_64/abseil-cpp-20250512.1-1-x86_64.pkg.tar.zst
-
-# Reboot
-clear
-tte -i ~/.local/share/omarchy/logo.txt --frame-rate 920 laseretch
-echo
-echo "You're done! So we're ready to reboot now..." | tte --frame-rate 640 wipe
-
-if sudo test -f /etc/sudoers.d/99-omarchy-installer; then
-  sudo rm -f /etc/sudoers.d/99-omarchy-installer &>/dev/null
-  echo -e "\nRemember to remove USB installer!\n\n"
-fi
-
-sleep 5
-reboot
+# Finishing
+source $OMARCHY_INSTALL/reboot.sh
